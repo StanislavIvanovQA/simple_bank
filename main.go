@@ -1,5 +1,29 @@
 package main
 
+import (
+	"database/sql"
+	"github.com/StanislavIvanovQA/simple_bank/api"
+	"github.com/StanislavIvanovQA/simple_bank/config"
+	db "github.com/StanislavIvanovQA/simple_bank/db/sqlc"
+	_ "github.com/lib/pq"
+	"log"
+)
+
 func main() {
-	println("hello world")
+	cfg, err := config.Load(".")
+	if err != nil {
+		log.Fatal("Could not load config", err)
+	}
+
+	conn, err := sql.Open(cfg.DBDriver, cfg.DBSource)
+	if err != nil {
+		log.Fatal("Could not connect to db:", err)
+	}
+
+	store := db.NewStore(conn)
+	server := api.NewServer(store)
+
+	if err = server.Start(cfg.ServerAddress); err != nil {
+		log.Fatal("cannot start server", err)
+	}
 }
