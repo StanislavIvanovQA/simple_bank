@@ -4,6 +4,9 @@ postgres:
 createdb:
 	docker exec -it postgres12 createdb --username=root --owner=root simple_bank
 
+dbup:
+	docker start postgres12
+
 dropdb:
 	docker exec -it postgres12 dropdb simple_bank
 
@@ -22,4 +25,7 @@ test:
 server:
 	go run main.go
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc server
+mock:
+	mockgen -destination=db/mock/store.go -source db/sqlc/store.go
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc server mock dbup

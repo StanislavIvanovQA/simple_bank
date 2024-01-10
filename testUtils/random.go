@@ -1,6 +1,7 @@
 package testUtils
 
 import (
+	"github.com/StanislavIvanovQA/simple_bank/util"
 	"github.com/go-faker/faker/v4"
 	"log"
 	"math/rand"
@@ -20,6 +21,6 @@ func RandomInt64(min, max int) int64 {
 }
 
 func RandomCurrency() string {
-	currencies := []string{"EUR", "USD", "CAD"}
+	currencies := []string{util.EUR, util.CAD, util.USD}
 	return currencies[rand.Intn(len(currencies))]
 }

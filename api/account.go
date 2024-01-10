@@ -10,10 +10,10 @@ import (
 
 type createAccountRequest struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=USD EUR"`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
-func (s *Server) createAccount(ctx *gin.Context) {
+func (s *Server) handlerCreateAccount(ctx *gin.Context) {
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -39,7 +39,7 @@ type getAccountRequest struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
-func (s *Server) getAccount(ctx *gin.Context) {
+func (s *Server) handlerGetAccount(ctx *gin.Context) {
 	var queryParams getAccountRequest
 	if err := ctx.ShouldBindUri(&queryParams); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -47,6 +47,7 @@ func (s *Server) getAccount(ctx *gin.Context) {
 	}
 
 	account, err := s.store.GetAccount(ctx, queryParams.ID)
+
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
@@ -65,7 +66,7 @@ type listAccountRequest struct {
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
-func (s *Server) listAccount(ctx *gin.Context) {
+func (s *Server) handlerListAccount(ctx *gin.Context) {
 	var request listAccountRequest
 
 	if err := ctx.ShouldBindQuery(&request); err != nil {
