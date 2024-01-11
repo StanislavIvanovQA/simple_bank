@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	mock_db "github.com/StanislavIvanovQA/simple_bank/db/mock"
+	mockdb "github.com/StanislavIvanovQA/simple_bank/db/mock"
 	db "github.com/StanislavIvanovQA/simple_bank/db/sqlc"
-	"github.com/StanislavIvanovQA/simple_bank/testUtils"
+	"github.com/StanislavIvanovQA/simple_bank/util"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"io"
@@ -22,13 +22,13 @@ func TestGetAccountAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		accountID     int64
-		buildStubs    func(store *mock_db.MockStore)
+		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name:      "OK",
 			accountID: account.ID,
-			buildStubs: func(store *mock_db.MockStore) {
+			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
@@ -42,7 +42,7 @@ func TestGetAccountAPI(t *testing.T) {
 		{
 			name:      "NotFound",
 			accountID: account.ID,
-			buildStubs: func(store *mock_db.MockStore) {
+			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
@@ -56,7 +56,7 @@ func TestGetAccountAPI(t *testing.T) {
 		{
 			name:      "InternalError",
 			accountID: account.ID,
-			buildStubs: func(store *mock_db.MockStore) {
+			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
@@ -70,7 +70,7 @@ func TestGetAccountAPI(t *testing.T) {
 		{
 			name:      "InvalidID",
 			accountID: 0,
-			buildStubs: func(store *mock_db.MockStore) {
+			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -88,10 +88,10 @@ func TestGetAccountAPI(t *testing.T) {
 			controller := gomock.NewController(t)
 			defer controller.Finish()
 
-			store := mock_db.NewMockStore(controller)
+			store := mockdb.NewMockStore(controller)
 			testCase.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/accounts/%d", testCase.accountID)
@@ -107,10 +107,10 @@ func TestGetAccountAPI(t *testing.T) {
 
 func randomAccount() db.Account {
 	return db.Account{
-		ID:       testUtils.RandomInt64(1, 500),
-		Owner:    testUtils.RandomName(),
-		Balance:  testUtils.RandomInt64(500, 1000),
-		Currency: testUtils.RandomCurrency(),
+		ID:       util.RandomInt64(1, 500),
+		Owner:    util.RandomName(),
+		Balance:  util.RandomInt64(500, 1000),
+		Currency: util.RandomCurrency(),
 	}
 }
 

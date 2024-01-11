@@ -3,27 +3,28 @@ package db
 import (
 	"context"
 	"database/sql"
-	"github.com/StanislavIvanovQA/simple_bank/testUtils"
+	"github.com/StanislavIvanovQA/simple_bank/util"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 )
 
 func createRandomAccount() (Account, CreateAccountParams, error) {
+	user, _, _ := createRandomUser()
+
 	arg := CreateAccountParams{
-		Owner:    testUtils.RandomName(),
-		Balance:  testUtils.RandomInt64(1, 10000),
-		Currency: testUtils.RandomCurrency(),
+		Owner:    user.Username,
+		Balance:  util.RandomInt64(1, 10000),
+		Currency: util.RandomCurrency(),
 	}
 
-	accont, err := testQueries.CreateAccount(context.Background(), arg)
+	account, err := testQueries.CreateAccount(context.Background(), arg)
 
-	return accont, arg, err
+	return account, arg, err
 }
 
 func TestCreateAccount(t *testing.T) {
 	account, params, err := createRandomAccount()
-
 	require.NoError(t, err)
 	require.NotEmpty(t, account)
 
